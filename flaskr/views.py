@@ -1,15 +1,10 @@
 import random
 
-from flask import Flask, request, jsonify, render_template, abort
-from mongoengine import connect
+from flask import request, jsonify, render_template, abort
 from mongoengine.base import ValidationError
 
+from flaskr import app
 from models import Topic
-
-app = Flask(__name__)
-app.config.from_object('settings')
-
-connect(app.config['DATABASE_NAME'])
 
 @app.route('/')
 def main():
@@ -25,7 +20,7 @@ def get_or_create_topic():
         except ValidationError:
             return jsonify(success = False,
                 data = {},
-                error = '[ValidationError] Could not validate your data. \
+                error = 'Could not validate your data. \
                 Please refer to the API-documentation.')
 
         return jsonify(success = created,
@@ -41,17 +36,16 @@ def get_or_create_topic():
         else:
             t = []
             for l in xrange(0, count):
-                if total <= 1:
+                if total == 0:
+                    break
+                if total == 1:
                     rand = 0
                 else:
                     rand = random.randint(0, total-1)
                 t.append(Topic.objects.all().skip(rand).next())
             if len(t) == 0:
                 return jsonify(success = False, data = [], 
-                        error = 'No topics found.1')
-        if not t:
-            return jsonify(success = False, data = [], error = 'No topics \
-                    found.')
+                        error = 'No topics found.')
         data = [{'id': str(x.id), 'topic': x.topic} for x in t]
         return jsonify(success = True, data = data)
 

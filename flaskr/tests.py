@@ -39,6 +39,11 @@ class flaskrTestCase(unittest.TestCase):
         _cleanup()
 
     def testGetRandom(self):
+        r = self.client.get('/api/1/topics/')
+        data = json.loads(r.data)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['error'], 'No topics found.')
+
         Topic(topic='foolar', ip='127.0.0.1').save()
         Topic(topic='coffee', ip='127.0.0.1').save()
         Topic(topic='tea', ip='127.0.0.1').save()
@@ -69,7 +74,8 @@ class flaskrTestCase(unittest.TestCase):
                 environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
         data = json.loads(r.data)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['error'].startswith('[ValidationError]'), True)
+        self.assertEqual(data['error'], 'Could not validate your data. \
+                Please refer to the API-documentation.')
 
     @unittest.skip('not implemented yet')
     def testAPIVote(self):
